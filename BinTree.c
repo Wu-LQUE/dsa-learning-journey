@@ -115,8 +115,15 @@ void layerTraversal(BinTree bt){
         if(node->left)addQ(queue,node->left);
         if(node->right)addQ(queue,node->right);
     }
-
     destroyQueue(queue);
+}
+int getHeight(BinTree bt){
+    if(!bt) return 0;//空树深度为0
+    if(!bt->left&&!bt->right) return 1;//叶子节点
+    int leftHeight = getHeight(bt->left);
+    int rightHeight = getHeight(bt->right);
+    int max = leftHeight >= rightHeight ? leftHeight : rightHeight;
+    return max+1;
 }
 
 int main(){
@@ -127,5 +134,6 @@ int main(){
     inOrderTraversal_stack(bt);
     printf("\n层序遍历\n");
     layerTraversal(bt);
+    printf("\n树的高度为:%d\n",getHeight(bt));
     freeBinTree(bt);
 }
