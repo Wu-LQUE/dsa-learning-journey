@@ -1,11 +1,12 @@
 #ifndef QUEUELINK_H
 #define QUEUELINK_H
 
+#include "BinTree.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 
-typedef int ElementType;
+typedef BinTree ElementType;
 typedef struct QNode * Queue;
 typedef struct ANode * Node;
 
@@ -29,7 +30,7 @@ ElementType addQ(Queue queue, ElementType val);
 ElementType deleteQ(Queue queue);
 
 /* 判断队列是否为空，返回 1 表示空，0 表示非空 */
-int isEmpty(Queue queue);
+int isEmptyQueue(Queue queue);
 
 /* 释放队列及其所有结点 */
 void destroyQueue(Queue queue);

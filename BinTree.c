@@ -102,7 +102,20 @@ void inOrderTraversal_stack(BinTree bt){
 }
 //层序遍历
 void layerTraversal(BinTree bt){
+    if(!bt){
+        printf("空树");
+        return;
+    }
     Queue queue = createQueue();
+    addQ(queue,bt);
+    while (!isEmptyQueue(queue))
+    {
+        BinTree node = deleteQ(queue);
+        printf("%d ",node->data);
+        if(node->left)addQ(queue,node->left);
+        if(node->right)addQ(queue,node->right);
+    }
+
     destroyQueue(queue);
 }
 
@@ -112,5 +125,7 @@ int main(){
     inOrderTraversal(bt);
     printf("\n借助栈实现中序遍历测试树\n");
     inOrderTraversal_stack(bt);
+    printf("\n层序遍历\n");
+    layerTraversal(bt);
     freeBinTree(bt);
 }

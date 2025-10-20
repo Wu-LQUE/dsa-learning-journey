@@ -36,7 +36,7 @@ ElementType deleteQ(Queue queue){
     ElementType data;
     if (!queue || queue->front == NULL) {
         fprintf(stderr, "deleteQ: queue is empty\n");
-        data = INT_MIN; /* 作为出错返回值 */
+        data = NULL; /* 作为出错返回值 */
     }else if(queue->front==queue->rear){
         //只有一个元素
         data = queue->front->data;
@@ -52,7 +52,7 @@ ElementType deleteQ(Queue queue){
     }
     return data;
 }
-int isEmpty(Queue queue) {
+int isEmptyQueue(Queue queue) {
     return (queue == NULL) || (queue->front == NULL);
 }
 
