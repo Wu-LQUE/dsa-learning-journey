@@ -1,14 +1,13 @@
-#include <stackTool.h>
+#include "stackTool.h"
 Stack createStack(){
     Stack stack = (Stack) malloc(sizeof(struct SNode));
     stack->nextNode=NULL;
-    stack->hasLeftParent=0;
     return stack;
 }
 int isEmpty(Stack stack){
     return stack->nextNode==NULL;
 }
-void push(Stack stack,char val){
+void push(Stack stack,ElementType val){
     // stack是头节点Top，后面一个才是真正单元
     // stack->data=val;
     Stack tmp = (Stack) malloc(sizeof(struct SNode));
@@ -16,21 +15,26 @@ void push(Stack stack,char val){
     tmp->nextNode = stack->nextNode;
     stack->nextNode=tmp;
 }
-char pop(Stack stack){
+ElementType pop(Stack stack){
     if(isEmpty(stack)){
         printf("栈空");
-        return -1;
+        return NULL;
     }else{
         Stack nextNode = stack->nextNode;
-        char retVal = nextNode->data;
+        ElementType retVal = nextNode->data;
         stack->nextNode = nextNode->nextNode;
         free(nextNode);
         return retVal;
     }
 }
-void printStack(Stack stack,char buffer[6]){
+ElementType getTop(Stack stack){
+    ElementType data = pop(stack);
+    push(stack,data);
+    return data;
+}
+void printStack(Stack stack){
     for(int i = 0;!isEmpty(stack);i++){
-        buffer[i] = stack->nextNode->data;
+        printf("%d",stack->nextNode->data->data);//根据类型调整
         stack = stack->nextNode;
     }
 }
