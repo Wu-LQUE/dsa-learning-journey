@@ -221,6 +221,19 @@ void insertToBst(TreeNodeDataType x ,BinTree bst){
         }
     }
 }
+BinTree refineInsertToBst(TreeNodeDataType x ,BinTree bst){
+    if(!bst){
+        BinTree insertNode = createBinTreeWithData(x);
+        return insertNode;
+    }else if (x > bst->data){
+        bst->right = refineInsertToBst(x,bst->right);
+    }else if (x == bst->data){
+        return bst;
+    }else{//x < bst->data
+        bst->left = refineInsertToBst(x,bst->left);
+    }
+    return bst;
+}
 int test(){
     BinTree bt = createTestBstTree();
      /* 创建如下结构的二叉树：
@@ -259,10 +272,26 @@ int test(){
     assert(bt->right->right->right->data==8&&bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
     insertToBst(7,bt);
     assert(bt->right->right->right->left->data==7&&bt->right->right->right->data==8&&bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
-    
     freeBinTree(bt);
+    printf("passCreate,Search,Insert,Tests\n");
+    return 1;
+}
+int testRefineInsert(){
+    BinTree bt = createTestBstTree();
+    refineInsertToBst(5,bt);
+    assert(bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    refineInsertToBst(4,bt);
+    assert(bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    //有所变化的插入
+    refineInsertToBst(8,bt);
+    assert(bt->right->right->right->data==8&&bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    refineInsertToBst(7,bt);
+    assert(bt->right->right->right->left->data==7&&bt->right->right->right->data==8&&bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    freeBinTree(bt);
+    printf("pass refineInsert Tests\n");
     return 1;
 }
 int main(){
     test();
+    testRefineInsert();
 }
