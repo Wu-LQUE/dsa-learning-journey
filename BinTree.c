@@ -8,6 +8,13 @@ BinTree createBinTree(){
     root->right = NULL;
     return root;
 }
+BinTree createBinTreeWithData(TreeNodeDataType data){
+    BinTree root = (BinTree) malloc(sizeof(struct TreeNode));
+    root->data = data;
+    root->left = NULL;
+    root->right = NULL;
+    return root;
+}
 // 创建测试用树的函数
 BinTree createTestTree() {
     /* 创建如下结构的二叉树：
@@ -164,7 +171,7 @@ BinTree findElement(TreeNodeDataType x,BinTree bst){
     else
         return findElement(x,bst->left);
 }
-BinTree IterFindElement(TreeNodeDataType x,BinTree bst){
+BinTree iterFindElement(TreeNodeDataType x,BinTree bst){
     while (bst)
     {
         if(x == bst->data){
@@ -178,21 +185,84 @@ BinTree IterFindElement(TreeNodeDataType x,BinTree bst){
     }
     return NULL;
 }
+BinTree findMin(BinTree bst){
+    if(!bst) return NULL;
+    // int min = bst->data;
+    while(bst->left){
+        bst = bst->left;
+    }
+    // min = bst->data;
+    return bst;
+}
+BinTree findMax(BinTree bst){
+    if(!bst) return NULL;
+    if(bst->right) return findMax(bst->right);
+    else return bst; 
+}
+void insertToBst(TreeNodeDataType x ,BinTree bst){
+    if(!bst){
+        BinTree insertNode = createBinTreeWithData(x);
+        bst = insertNode;
+    }else if (x > bst->data){
+        if(bst->right==NULL){
+            BinTree insertNode = createBinTreeWithData(x);
+            bst->right = insertNode;
+        }else{
+            insertToBst(x,bst->right);
+        }
+    }else if (x == bst->data){
+        return;
+    }else{//x < bst->data
+        if(bst->left==NULL){
+            BinTree insertNode = createBinTreeWithData(x);
+            bst->left = insertNode;
+        }else{
+            insertToBst(x,bst->left);
+        }
+    }
+}
 int test(){
     BinTree bt = createTestBstTree();
+     /* 创建如下结构的二叉树：
+          4
+        /   \
+       2     5
+      / \     \
+     1   3     6
+    */
     // printf("递归中序遍历测试树\n");
     // inOrderTraversal(bt);
     // printf("\n借助栈实现中序遍历测试树\n");
     // inOrderTraversal_stack(bt);
-    printf("前序遍历二叉搜索树\n");
-    preOrderTraversal(bt);
-    printf("\n");
+    // printf("前序遍历二叉搜索树\n");
+    // preOrderTraversal(bt);
+    assert(bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    // printf("\n");
     int target = 5;
     BinTree pos = findElement(target,bt);
-    printf("find %d in %d\n",target,pos->data);
+    // printf("find %d in %d\n",target,pos->data);
     assert(pos->data==target&&pos->right->data==6);
+    pos = iterFindElement(target,bt);
+    // printf("find %d in %d\n",target,pos->data);
+    assert(pos->data==target&&pos->right->data==6);
+    pos = findMin(bt);
+    assert(pos&&pos->data==1);
+    pos = findMax(bt);
+    assert(pos&&pos->data==6);
+    printf("passCreateAndSearchTests\n");
+    insertToBst(5,bt);
+    assert(bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    insertToBst(4,bt);
+    assert(bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    //有所变化的插入
+    insertToBst(8,bt);
+    assert(bt->right->right->right->data==8&&bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    insertToBst(7,bt);
+    assert(bt->right->right->right->left->data==7&&bt->right->right->right->data==8&&bt->data==4&&bt->left->data==2&&bt->right->data==5&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->right->data==6);
+    
     freeBinTree(bt);
+    return 1;
 }
 int main(){
-    
+    test();
 }
