@@ -1,6 +1,9 @@
 #include "stackTool.h"
 #include "queueLink.h"
+#include <stdio.h>
 #include "assert.h"
+#include <math.h>
+#include <string.h>
 BinTree createBinTree(){
     BinTree root = (BinTree) malloc(sizeof(struct TreeNode));
     root->data = 0;
@@ -221,6 +224,46 @@ void insertToBst(TreeNodeDataType x ,BinTree bst){
         }
     }
 }
+int getHeight(BinTree bt){
+    if(!bt) return 0;//空树深度为0
+    if(!bt->left&&!bt->right) return 1;//叶子节点
+    int leftHeight = getHeight(bt->left);
+    int rightHeight = getHeight(bt->right);
+    int max = leftHeight >= rightHeight ? leftHeight : rightHeight;
+    return max+1;
+}
+
+int calculateFactor(BinTree bt){
+    if(!bt) return 0;
+    int H_Left = getHeight(bt->left);
+    int H_Right = getHeight(bt->right);
+    return H_Left - H_Right;
+}
+
+char* getRotationType(BinTree finder, BinTree destroyer){
+    char* rotationType =(char*)malloc(3 * sizeof(char));  // 动态分配
+    if(!rotationType) return NULL;
+    
+    rotationType[0] = rotationType[1] = 0;
+    rotationType[2] = '\0';  // 字符串终止符
+    
+    if(finder->left){
+        rotationType[0] = 'L';
+        if(findElement(destroyer->data, finder->left->left))
+            rotationType[1] = 'L';
+        else if(findElement(destroyer->data, finder->left->right))
+            rotationType[1] = 'R';
+    } else if(finder->right){
+        rotationType[0] = 'R';
+        if(findElement(destroyer->data, finder->right->left))
+            rotationType[1] = 'L';
+        else if(findElement(destroyer->data, finder->right->right))
+            rotationType[1] = 'R';
+    }
+    
+    return rotationType;
+}
+
 BinTree refineInsertToBst(TreeNodeDataType x ,BinTree bst){
     if(!bst){
         BinTree insertNode = createBinTreeWithData(x);
@@ -234,6 +277,68 @@ BinTree refineInsertToBst(TreeNodeDataType x ,BinTree bst){
     }
     return bst;
 }
+int isBalance(BinTree bt){
+    int balanceFactor = abs(calculateFactor(bt));
+    if(balanceFactor>=2) return 0;
+    else return 1;
+}
+BinTree liftParent = NULL;
+void scanAndAdjustBalance(BinTree bst,BinTree insertNode){
+    if(!bst) return;
+    int balanceFactor = abs(calculateFactor(bst));
+    if(balanceFactor>=2){
+        while(!isBalance(bst->left)){
+            liftParent = bst;
+            bst = bst->left;
+        }
+        while(!isBalance(bst->right)){
+            liftParent = bst;
+            bst = bst->right;
+        }
+        char* rotationType = getRotationType(bst,insertNode);
+        if(!strcmp(rotationType,"LL")){
+            BinTree liftNode = bst->left;
+            bst->left = liftNode->right;
+            liftNode->right = bst;
+            liftParent->left = liftNode;
+        }else if (!strcmp(rotationType,"LR"))
+        {
+            BinTree liftNode = bst->left->right;
+            bst->left->right = liftNode->left;
+            liftNode->left = bst->left;
+            bst->left = liftNode->right;
+            liftNode->right = bst;
+            liftParent->left = liftNode;
+        }else if (!strcmp(rotationType,"RR"))
+        {
+            BinTree liftNode = bst->right;
+            bst->right = liftNode->left;
+            liftNode->left = bst;
+            liftParent->right = liftNode;
+        }else if (!strcmp(rotationType,"RL"))
+        {
+            BinTree liftNode = bst->right->left;
+            bst->right->left = liftNode->right;
+            liftNode->right = bst->right;
+            bst->right = liftNode->left;
+            liftNode->left = bst;
+            liftParent->right = liftNode;
+        }else{
+            printf("666,跑这来了");
+            return;
+        }
+        if(rotationType[0]!='\0'){
+            free(rotationType);
+            return;
+        }
+    }else{
+        liftParent = bst;
+        scanAndAdjustBalance(bst->left,insertNode);
+        liftParent = bst;
+        scanAndAdjustBalance(bst->right,insertNode);
+    }
+}
+
 int test(){
     BinTree bt = createTestBstTree();
      /* 创建如下结构的二叉树：
@@ -276,6 +381,7 @@ int test(){
     printf("passCreate,Search,Insert,Tests\n");
     return 1;
 }
+
 int testRefineInsert(){
     BinTree bt = createTestBstTree();
     refineInsertToBst(5,bt);
@@ -291,7 +397,68 @@ int testRefineInsert(){
     printf("pass refineInsert Tests\n");
     return 1;
 }
+
+int testInsertAndAdjust(){
+    BinTree bt = createTestBstTree();
+     /* 创建如下结构的二叉树：
+          4
+        /   \
+       2     5
+      / \     \
+     1   3     6
+    */
+    BinTree insertNode;
+    refineInsertToBst(7,bt);
+    insertNode = findElement(7,bt);
+    scanAndAdjustBalance(bt,insertNode);
+    /*变成这样
+          4
+        /   \
+       2     6
+      / \   / \
+     1   3 5   7
+    */
+    assert(bt->data==4&&bt->left->data==2&&bt->right->data==6&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->left->data==5&&bt->right->right->data==7);
+    
+    refineInsertToBst(0,bt);
+    insertNode = findElement(0,bt);
+    scanAndAdjustBalance(bt,insertNode);
+    /*变成这样
+          4
+        /   \
+       2     6
+      / \   / \
+     1   3 5   7
+    /
+   0
+    */
+    assert(bt->left->left->left->data==0&&bt->data==4&&bt->left->data==2&&bt->right->data==6&&bt->left->left->data==1&&bt->left->right->data==3&&bt->right->left->data==5&&bt->right->right->data==7);
+    
+    refineInsertToBst(-1,bt);
+    insertNode = findElement(-1,bt);
+    scanAndAdjustBalance(bt,insertNode);
+    /*变成这样
+          4
+        /   \
+       2     6
+      / \   / \
+     0   3 5   7
+    / \
+   -1  1
+    */
+    refineInsertToBst(12,bt);
+    insertNode = findElement(12,bt);
+    scanAndAdjustBalance(bt,insertNode);
+    
+    refineInsertToBst(11,bt);
+    insertNode = findElement(11,bt);
+    scanAndAdjustBalance(bt,insertNode);
+    printf("pass refineInsertAndBalance Tests\n");
+    return 1;
+}
+
 int main(){
     test();
     testRefineInsert();
+    testInsertAndAdjust();
 }
