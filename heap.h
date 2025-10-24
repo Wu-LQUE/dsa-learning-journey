@@ -1,7 +1,8 @@
 #ifndef HEAP_H
 #define HEAP_H
-#define MaxHeapData 2147483647
-#define MinHeapData -2147483648
+#include <limits.h>
+#define MaxHeapData INT_MAX
+#define MinHeapData INT_MIN
 typedef int ElementType;
 typedef struct HeapStruct *MaxHeap;
 struct HeapStruct{
