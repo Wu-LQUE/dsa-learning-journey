@@ -8,4 +8,8 @@ struct TreeNode{
     BinTree left;
     BinTree right;
 };
+BinTree createBinTree();
+BinTree createBinTreeWithData(TreeNodeDataType data);
+int getHeight(BinTree bt);
+int calculateFactor(BinTree bt);
 #endif

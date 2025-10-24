@@ -1,5 +1,6 @@
 #include "stackTool.h"
 #include "queueLink.h"
+#include "avl.h"
 #include <stdio.h>
 #include "assert.h"
 #include <math.h>
@@ -287,11 +288,11 @@ void scanAndAdjustBalance(BinTree bst,BinTree insertNode){
     if(!bst) return;
     int balanceFactor = abs(calculateFactor(bst));
     if(balanceFactor>=2){
-        while(!isBalance(bst->left)){
+        while(bst->right&&!isBalance(bst->left)){
             liftParent = bst;
             bst = bst->left;
         }
-        while(!isBalance(bst->right)){
+        while(bst->left&&!isBalance(bst->right)){
             liftParent = bst;
             bst = bst->right;
         }
@@ -456,9 +457,8 @@ int testInsertAndAdjust(){
     printf("pass refineInsertAndBalance Tests\n");
     return 1;
 }
-
 int main(){
     test();
     testRefineInsert();
-    testInsertAndAdjust();
+    testInsertAndAdjust();//有缺陷的算法实现
 }
