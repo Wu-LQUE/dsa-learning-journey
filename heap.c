@@ -92,6 +92,8 @@ static int deleteMax(MaxHeap H){
     H->elements[parent] = temp;
     return maxItem;
 }
+
+//更简单,易维护的版本,idx-=2 idx/2等价于notLeafNode--
 static MaxHeap createMaxHeapBySequence(int size,int *array){
     MaxHeap heap = create(size);
     if (!heap) return NULL;
@@ -105,28 +107,18 @@ static MaxHeap createMaxHeapBySequence(int size,int *array){
         heap->elements[i]=array[i-1];
     }
     heap->size = size;
-    if(heap->size==1) return heap;
-    int idx = heap->size;
-    int parentNode = idx/2;
-    while (1)
-    {
-        int parent = parentNode;
-        ElementType tmp = heap->elements[parent];
-        int child;
-        while(1){
-            child = parent * 2;
-            if(child>heap->size) break;
-            if(child != heap->size&&heap->elements[child]<heap->elements[child+1]){
-                child++;
-            }
+
+    //找到第一个非叶子节点,遍历所有非叶子节点
+    for(int notLeafNode = heap->size/2;notLeafNode>=1;notLeafNode--){
+        ElementType tmp = heap->elements[notLeafNode];
+        int parent=notLeafNode,child;
+        for(;parent*2<=heap->size;parent=child){
+            child = parent*2;
+            if(child < heap->size && heap->elements[child] < heap->elements[child+1]) child++;
             if(tmp>=heap->elements[child]) break;
             heap->elements[parent] = heap->elements[child];
-            parent=child;
         }
         heap->elements[parent] = tmp;
-        if(parentNode == 1) break;
-        idx-=2;
-        parentNode = idx/2;
     }
     return heap;
 }
