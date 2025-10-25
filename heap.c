@@ -2,8 +2,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+//最小堆是一个完全二叉树，从数组1开始放
+MinHeap createMinHeap(int maxSize){
+    MinHeap heap = malloc(sizeof(struct HeapStruct));
+    heap->elements = malloc(sizeof(ElementType)*(maxSize+1));
+    heap->size = 0;
+    heap->capacity = maxSize;
+    heap->elements[0] = MinHeapData;
+    return heap;
+}
+
 //最大堆是一个完全二叉树，放数组里，从1开始放
-MaxHeap create(int maxSize){
+MaxHeap createMaxHeap(int maxSize){
     MaxHeap H = malloc(sizeof(struct HeapStruct));
     //从堆下标为1开始放 
     H->elements = malloc((maxSize+1)*sizeof(ElementType));
@@ -13,15 +23,25 @@ MaxHeap create(int maxSize){
     //定义哨兵为大于堆中所有可能元素的值，便于以后更快操作
     return H;
 }
-static int isFull(MaxHeap H){
+
+static int isFull(Heap H){
     if(H->size==H->capacity) return 1;
     else return 0;
 }
-static int isEmpty(MaxHeap H){
+static int isEmpty(Heap H){
     return H->size==0;
 }
+static void insertToMin(MinHeap heap, ElementType item){
+    if (isFull(heap)) { printf("最小堆已经满了"); return; }
+    int i = ++heap->size;
+    for (; heap->elements[i/2] > item; i /= 2) {
+        heap->elements[i] = heap->elements[i/2];
+    }
+    heap->elements[i] = item;
+}
+
 //size从0开始
-static void insert(MaxHeap H,ElementType item){
+static void insertToMax(MaxHeap H,ElementType item){
     int i;
     if(isFull(H)){
         printf("最大堆已满");
@@ -68,6 +88,28 @@ static void insert(MaxHeap H,ElementType item){
 //     return maxElement;
 // }
 
+static int deleteMin(MinHeap heap){
+    if(isEmpty(heap)){
+        printf("最小堆已空");
+        return MaxHeapData;
+    }
+    ElementType minItem = heap->elements[1];
+    ElementType temp = heap->elements[heap->size--];
+    int parent = 1,child;
+    //可以将parent看成指向temp的指针
+    for(;parent*2<=heap->size;parent = child){
+        child = parent*2;
+        //取最小child
+        if(child+1<=heap->size&&heap->elements[child+1]<heap->elements[child]){
+            child++;
+        }
+        if(temp<=heap->elements[child]) break;
+        heap->elements[parent] = heap->elements[child];
+    }
+    heap->elements[parent] = temp;
+    return minItem;
+}
+
 /*“标准下滤”写法：不必先把 lastElement 放到根再与子节点两两交换，直接用一个临时变量一路下滤，
 赋值次数更少、逻辑更清晰，也避免使用 MinHeapData 作为“哨兵子节点”的技巧。*/
 static int deleteMax(MaxHeap H){
@@ -93,9 +135,36 @@ static int deleteMax(MaxHeap H){
     return maxItem;
 }
 
+
+static MinHeap createMinHeapBySequence(int size,int *array){
+    MinHeap heap = createMinHeap(size);
+    if(!heap) return NULL;
+    if(size <= 0) return heap;
+    if(!array){
+        heap->size = 0;
+        return heap;
+    }
+    for(int i = 1;i<=size;i++){
+        heap->elements[i] = array[i-1];
+    }
+    heap->size = size;
+    for(int notLeafNode = heap->size/2;notLeafNode>=1;notLeafNode--){
+        ElementType temp = heap->elements[notLeafNode];
+        int parent = notLeafNode,child;
+        for(;parent*2<=heap->size;parent=child){
+            child = parent * 2;
+            if(child + 1<=heap->size&&heap->elements[child+1] < heap->elements[child]) child++;
+            if(temp<=heap->elements[child]) break;
+            heap->elements[parent] = heap->elements[child];
+        }
+        heap->elements[parent] = temp;
+    }
+    return heap;
+}
+
 //更简单,易维护的版本,idx-=2 idx/2等价于notLeafNode--
 static MaxHeap createMaxHeapBySequence(int size,int *array){
-    MaxHeap heap = create(size);
+    MaxHeap heap = createMaxHeap(size);
     if (!heap) return NULL;
     if (size <= 0) return heap;
     if (!array) { // 防御式检查
