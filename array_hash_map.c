@@ -45,24 +45,45 @@ void delArrayHashMap(ArrayHashMap *hmap){
 }
 
 //碰碰车式哈希函数,后面再改
-int hashFunc(const int key) {
-    return key % MAXSIZE;
+int hashFunc(int key) {
+    int idx = key % MAXSIZE;
+    return idx < 0 ? idx + MAXSIZE : idx;
 }
 
 void put(ArrayHashMap *hmap,const int key,const char *val){
-    Pair *pair =(Pair*) malloc(sizeof(Pair));
-    pair->key = key;
-    pair->val =(char*) malloc(strlen(val)+1);
-    strncpy(pair->val,val,strlen(val)+1);
     int index = hashFunc(key);
+    Pair *slot = hmap->buckets[index];
+    if (slot && slot->key == key) {
+        char *newVal = (char*) malloc(strlen(val)+1);
+        if(!newVal){perror("malloc");exit(1);}
+        strcpy(newVal,val);
+        free(slot->val);
+        slot->val = newVal;
+        return;
+    }
+
+    Pair *pair = (Pair*)malloc(sizeof(Pair));
+    if (!pair) { perror("malloc"); exit(1); }
+    pair->key = key;
+    pair->val = (char*)malloc(strlen(val)+1);
+    if (!pair->val) { perror("malloc"); exit(1); }
+    strcpy(pair->val, val);
+
+    if (slot) { // 冲突覆盖，避免泄漏
+        free(slot->val);
+        free(slot);
+    }
     hmap->buckets[index] = pair;
 }
 
-void removeItem(ArrayHashMap *hmap,const int key){
+void removeItem(ArrayHashMap *hmap, const int key){
     int index = hashFunc(key);
-    free(hmap->buckets[index]->val);
-    free(hmap->buckets[index]);
-    hmap->buckets[index]=NULL;
+    Pair *slot = hmap->buckets[index];
+    if (!slot) return;                  // 本来就没有
+    if (slot->key != key) return;       // 冲突但 key 不匹配：不删除
+    free(slot->val);
+    free(slot);
+    hmap->buckets[index] = NULL;
 }
 
 void pairSet(ArrayHashMap *hmap,PairMapSet *set){
