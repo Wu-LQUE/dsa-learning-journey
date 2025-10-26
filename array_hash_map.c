@@ -21,7 +21,6 @@ typedef struct AValMapSet {
     int len;
 } ValMapSet;
 
-
 typedef struct 
 {
     Pair *buckets[MAXSIZE];
