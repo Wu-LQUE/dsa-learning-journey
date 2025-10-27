@@ -2,140 +2,185 @@
 #include <stdlib.h>
 #define MAX_GRAPH_SIZE 10
 
-typedef struct AGraphtAdjList {
+//每个heads[i]是一个"头节点",其vertex指向本节点对象,next指向邻接链表
+typedef struct GraphAdjList {
     AdjListNode *heads[MAX_GRAPH_SIZE];
-    int size;
-} GraphtAdjList;
+    int vertex_count;
+} GraphAdjList;
 
-typedef struct AVertex {
-    int vertex;
-} Vertex;
+typedef struct GraphVertex {
+    int id;//顶点标识
+} GraphVertex;
 
-typedef struct A_AdjListNode
+//边节点,有顶点的引用，和指向下一个节点的指针
+typedef struct AdjListNode
 {
-    Vertex *vertex;
+    GraphVertex *vertex;//边节点不拥有vertex,仅引用
     AdjListNode *next;
 } AdjListNode;
 
-AdjListNode *findNode(GraphtAdjList *graph,Vertex *vet) {
-    for (int i = 0; i < graph->size; i++) {
-        if (graph->heads[i]->vertex == vet) {
-            return graph->heads[i];
+/* 内部辅助函数（静态） */
+static AdjListNode *find_head_by_vertex_ptr(const GraphAdjList *g, const GraphVertex *v) {
+    if (!g || !v) return NULL;
+    for (int i = 0; i < g->vertex_count; ++i) {
+        //将头节点的vertex指针和参数的vertex指针匹配，检测头节点里是否已经存在vertex
+        if (g->heads[i] && g->heads[i]->vertex == v) {
+            return g->heads[i];
         }
     }
     return NULL;
 }
 
-void addEdgeHelper(AdjListNode *head,Vertex *vet) {
-    AdjListNode *node = (AdjListNode *) malloc(sizeof(AdjListNode));
-    node->vertex = vet;
+static int edge_exists(const AdjListNode *head, const GraphVertex *v) {
+    for (const AdjListNode *cur = head ? head->next : NULL; cur; cur = cur->next) {
+        if (cur->vertex == v) return 1;
+    }
+    return 0;
+}
+
+//新增一条单向边
+static int add_edge_oneway(AdjListNode *head, GraphVertex *to) {
+    if (!head || !to) return -1;
+    if (edge_exists(head, to)) return 0; /* 已存在则忽略，返回0表示“无变更” */
+    AdjListNode *node = (AdjListNode *)malloc(sizeof(*node));
+    if (!node) return -2;
+    node->vertex = to;
     node->next = head->next;
     head->next = node;
+    return 1; /* 新增成功 */
 }
 
-void removeEdgeHelper(AdjListNode *head,Vertex *vet) {
-    AdjListNode *pre = head;
-    AdjListNode *cur = head->next;
-    while (cur !=NULL && cur->vertex != vet) {
+static int remove_edge_oneway(AdjListNode *head,const GraphVertex *to) {
+    if (!head || !to) return -1;
+    AdjListNode *pre = head,*cur = head->next;
+    while (cur)
+    {
+        if (cur->vertex = to) {
+            pre->next = cur->next;
+            free(cur);//vertex是头节点所有，不能在边节点里free;
+            return 1;//成功删除一次
+        }
         pre = cur;
         cur = cur->next;
     }
-    if(cur == NULL) {
-        return;
-    }
-    pre->next = cur->next;
-    free(cur);
+    return 0;//未找到
 }
 
-GraphtAdjList *newGraphAdjList() {
-    GraphtAdjList *graph = (GraphtAdjList*) malloc(sizeof(GraphtAdjList));
-    if (!graph) return NULL;
-    graph->size = 0;
-    for (int i = 0; i < MAX_GRAPH_SIZE; i++) {
-        graph->heads[i] = NULL;
-    }
-    return graph;
+GraphAdjList *graph_create() {
+    GraphAdjList *g = (GraphAdjList *) malloc(sizeof(*g));//奇妙的写法，长见识了
+    if(!g) return NULL;
+    g->vertex_count = 0;
+    for (int i = 0; i < MAX_GRAPH_SIZE; ++i) g->heads[i] = NULL;//使用i++和++i并没有实质的区别，编码规范推荐++i
+    return g;
 }
 
-void delGraphAdjList(GraphtAdjList *graph) {
-    if(!graph) return;
-    for(int i = 0;i < graph->size;i++){
-        AdjListNode *cur = graph->heads[i];
-        while (cur) {
-            AdjListNode *next = cur->next;
-            free(cur->vertex);
-            if(cur != graph->heads[i]) {
-                 free(cur);
-            }
-            cur = next;
+void graph_destroy(GraphAdjList *g) {
+    if (!g) return;
+    for (int i = 0; i < g->vertex_count; ++i) {
+        AdjListNode *head = g->heads[i];
+        if (!head) continue;
+        //释放头节点后的邻接边节点(不释放其 vertex 指针所指向的对象)
+        AdjListNode *e = head->next;
+        while (e) {
+            AdjListNode *next = e->next;
+            free(e);
+            e = next;
         }
-        free(graph->heads[i]->vertex);
-        free(graph->heads[i]);
+        //释放头节点所有的vertex和自己
+        if (head->vertex) free(head->vertex);
+        free(head);
+        g->heads[i] = NULL;
     }
-    free(graph);
+    free(g);
 }
 
-AdjListNode *findNode(GraphtAdjList *graph,Vertex *vet) {
-    for (int i = 0; i < graph->size; i++) {
-        if (graph->heads[i]->vertex == vet) {
-            return graph->heads[i];
-        }
-    }
-    return NULL;
-}
-
-void addEdge(GraphtAdjList *graph,Vertex *vet1,Vertex *vet2) {
-    AdjListNode *head1 = findNode(graph,vet1);
-    AdjListNode *head2 = findNode(graph,vet2);
-    assert(head1 != NULL && head2 != NULL && head1 != head2);
-    addEdgeHelper(head1,vet2);
-    addEdgeHelper(head2,vet1);
-}
-
-void removeEdge(GraphtAdjList *graph,Vertex *vet1,Vertex *vet2) {
-    AdjListNode *head1 = findNode(graph,vet1);
-    AdjListNode *head2 = findNode(graph,vet2);
-    assert(head1 != NULL && head2 != NULL);
-    removeEdgeHelper(head1,head2->vertex);
-    removeEdgeHelper(head2,head1->vertex);
-}
-
-void addVertex(GraphtAdjList *graph,Vertex *vet) {
-    assert(graph !=NULL&&graph->size < MAX_GRAPH_SIZE);
-    AdjListNode *head = (AdjListNode *) malloc(sizeof(AdjListNode));
-    head->vertex= vet;
+int graph_add_vertex(GraphAdjList *g,GraphVertex *v) {
+    if (!g || !v) return -1;
+    if (g->vertex_count >= MAX_GRAPH_SIZE) return -2;
+    /* 可选：检查是否重复（基于指针身份） */
+    if (find_head_by_vertex_ptr(g, v)) return -3; /* 已存在 */
+    AdjListNode *head = (AdjListNode *)malloc(sizeof(*head));
+    if (!head) return -4;
+    head->vertex = v;
     head->next =NULL;
-    graph->heads[graph->size++] = head;
+    g->heads[g->vertex_count++] = head;
+    return 0;
 }
 
-void removeVertex(GraphtAdjList *graph,Vertex *vet) {
-    AdjListNode *node = findNode(graph,vet);
-    asser(node !=NULL);
-    AdjListNode *cur = node,*pre = NULL;
-    while (cur) {
-        pre = cur;
-        cur = cur->next;
-        free(pre);
+//无向边：双向插入
+int graph_add_edge(GraphAdjList *g,GraphVertex *v1,GraphVertex *v2) {
+    if (!g || !v1 || !v2) return -1;
+    if (v1 == v2) return -2;//不允许自环
+    AdjListNode *head1 = find_head_by_vertex_ptr(g,v1);
+    AdjListNode *head2 = find_head_by_vertex_ptr(g,v2);
+    if (!head1 || !head2) return -3;
+    int r1 = add_edge_oneway(head1,v2);
+    if (r1 < 0) return r1;
+    int r2 = add_edge_oneway(head2,v1);
+    if (r2 < 0) {//回滚已添加的一边，保持一致性
+        remove_edge_oneway(head1,v2);
+        return r2;
     }
-    for (int i = 0; i < graph->size; i++) {
-        cur = graph->heads[i];
-        pre = NULL;
-        while (cur) {
-            pre = cur;
-            cur = cur->next;
-            if (cur && cur->vertex == vet) {
-                pre->next = cur->next;
-                free(cur);
-            }
+    /* 若两侧均报告0，表示两边都已存在，无变更0，添加成功1 */
+    return (r1 > 0 || r2 > 0) ? 1 : 0;
+}
+
+int graph_remove_edge(GraphAdjList *g,GraphVertex *v1,GraphVertex *v2) {
+    if (!g || !v1 || !v2) return -1;
+    AdjListNode *h1 = find_head_by_vertex_ptr(g, v1);
+    AdjListNode *h2 = find_head_by_vertex_ptr(g, v2);
+    if (!h1 || !h2) return -2;
+    int r1 = remove_edge_oneway(h1, v2);//删除成功返回1，否则未找到返回0
+    int r2 = remove_edge_oneway(h2, v1);
+    return (r1 > 0 || r2 > 0) ? 1 : 0; /* 任意一侧删到就算删除 1 */
+}
+
+int graph_remove_vertex(GraphAdjList *g,GraphVertex *v) {
+    if (!g || !v) return -1;
+    /* 找到头结点及其索引 */
+    int idx = -1;
+    for (int i = 0; i < g->vertex_count; ++i) {
+        if (g->heads[i] && g->heads[i]->vertex == v) {
+            idx = i;
+            break;
         }
     }
-    int i;
-    for(i = 0;i < graph->size; i++) {
-        if (graph->heads[i] == node) break;
+    if (idx < 0) return -2;
+    AdjListNode *head = g->heads[idx];
+
+    /* 先从其他顶点的邻接表中移除指向 v 的边（避免使用已释放指针） */
+    for (int i = 0; i < g->vertex_count; ++i) {
+        if (i == idx) continue;
+        AdjListNode *h = g->heads[i];
+        if (!h) continue;
+        while(remove_edge_oneway(h,v)>0);//循环删干净，返回0即未找到，1是删除一条
     }
-    for(int j = i; j < graph->size - 1; j++) {
-        graph->heads[j] = graph->heads[j+1];
+
+    /* 释放该顶点的所有边节点 */
+    AdjListNode *edge = head->next;
+    while (edge)
+    {
+        AdjListNode *next = edge->next;
+        free(edge);
+        edge = next;
     }
-    graph->size--;
-    free(vet);
+
+    /* 释放顶点与头结点 */
+    if (head->vertex) free(head->vertex);
+    free(head);
+
+    /* 收缩 heads 数组 */
+    for (int i = idx; i < MAX_GRAPH_SIZE - 1; i++) {
+        g->heads[i] = g->heads[i+1];
+    }
+    g->heads[g->vertex_count - 1] = NULL;
+    g->vertex_count--;
+    return 0;
+}
+
+GraphVertex *graph_vertex_create(int id) {
+    GraphVertex *v = (GraphVertex *)malloc(sizeof(*v));
+    if (!v) return NULL;
+    v->id = id;
+    return v;
 }
