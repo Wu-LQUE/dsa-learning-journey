@@ -1,6 +1,7 @@
 #include "graph_adjacency_list.h"
 #include "queueLink.h"
-/* 内部辅助函数（静态） */
+/* 内部辅助函数（静态）
+    通过vertex指针寻找到它的真正所有者(头节点)*/
 static AdjListNode *find_head_by_vertex_ptr(const GraphAdjList *g, const GraphVertex *v) {
     if (!g || !v) return NULL;
     for (int i = 0; i < g->vertex_count; ++i) {
@@ -238,4 +239,27 @@ void graphBFS(GraphAdjList *g) {
         }
     }
     destroyQueue(queue);
+}
+
+void dfs(GraphAdjList *graph,GraphVertex *vertex,GraphVertex **result,int *resultSize) {
+    if (!graph || !vertex || !result || !resultSize) return;
+    // 若已访问则直接返回，避免重复与潜在环，同时能防止调用方重复调用节点导致的数组越界问题
+    if (isVisited(result, *resultSize, vertex)) return;
+    result[(*resultSize)++] = vertex;
+    AdjListNode *node = find_head_by_vertex_ptr(graph,vertex);
+    if (!node) return;
+    //深度优先搜索也是要遍历所有邻接节点的
+    for (AdjListNode *e = node->next;e;e=e->next) {
+        //用 result 既做访问序列又做 visited 集合是可行的
+        if (!isVisited(result,*resultSize,e->vertex)) {
+            dfs(graph,e->vertex,result,resultSize);
+        }
+    }
+}
+
+void graphDFS(GraphAdjList *graph,GraphVertex *startVertex,GraphVertex **result,int *resultSize) {
+    if (!graph || !startVertex || !result || !resultSize) return;
+    // 如需从空结果开始，可取消注释
+    // *resultSize = 0;
+    dfs(graph,startVertex,result,resultSize);
 }
