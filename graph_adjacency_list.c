@@ -1,4 +1,5 @@
 #include "graph_adjacency_list.h"
+#include "queueLink.h"
 /* 内部辅助函数（静态） */
 static AdjListNode *find_head_by_vertex_ptr(const GraphAdjList *g, const GraphVertex *v) {
     if (!g || !v) return NULL;
@@ -35,7 +36,7 @@ static int remove_edge_oneway(AdjListNode *head,const GraphVertex *to) {
     AdjListNode *pre = head,*cur = head->next;
     while (cur)
     {
-        if (cur->vertex = to) {
+        if (cur->vertex == to) {
             pre->next = cur->next;
             free(cur);//vertex是头节点所有，不能在边节点里free;
             return 1;//成功删除一次
@@ -163,4 +164,78 @@ GraphVertex *graph_vertex_create(int id) {
     if (!v) return NULL;
     v->id = id;
     return v;
+}
+
+int isVisited(GraphVertex **visited,int size,GraphVertex *vet) {
+    for (int i = 0; i < size; ++i) {
+        if (visited[i] == vet) return 1;
+    }
+    return 0;
+}
+
+// void graphBFS(GraphAdjList *g) {
+//     if (!g || g->vertex_count <= 0) return;
+    
+//     Queue queue = createQueue();
+//     if (!queue) return;
+
+//     //获取所有头节点数
+//     int vertex_count = g->vertex_count;
+//     int visited_size = 0;
+//     int res_size = 0;
+//     GraphVertex *visited[vertex_count];
+//     GraphVertex *res[vertex_count];
+    
+//     //将头节点入队
+//     AdjListNode *node = g->heads[0];
+//     visited[visited_size++] = node->vertex;
+//     addQ(queue,node);
+
+//     while (!isEmptyQueue(queue))
+//     {
+//         node = deleteQ(queue);
+//         if (!node) break;
+//         res[res_size++] = node->vertex;
+//         node = node->next;
+//         while (node) {
+//             if (!isVisited(visited,visited_size,node->vertex)) {
+//                 AdjListNode *e = find_head_by_vertex_ptr(g,node->vertex);
+//                 if (e) {
+//                     visited[visited_size++] = e->vertex;
+//                     addQ(queue,e);
+//                 }
+//             }
+//             node = node->next;
+//         }
+//     }
+//     destroyQueue(queue);
+// }
+
+void graphBFS(GraphAdjList *g) {
+    if (!g || g->vertex_count <= 0) return;
+    Queue queue = createQueue();
+    if (!queue) return;
+    // int vertex_count = g->vertex_count;
+    int visitedSize=0,resultSize=0;
+    // 若需更好的可移植性，改用 MAX_GRAPH_SIZE
+    GraphVertex *visited[MAX_GRAPH_SIZE];
+    GraphVertex *result[MAX_GRAPH_SIZE];
+    // 起点：入队即标记
+    AdjListNode *head = g->heads[0];
+    visited[visitedSize++] = head->vertex;
+    addQ(queue,head);
+    while (!isEmptyQueue(queue)) {
+        head = deleteQ(queue);
+        if (!head) break;
+        result[resultSize++] = head->vertex;
+        for (AdjListNode *e = head->next;e;e=e->next) {
+            if (!isVisited(visited,visitedSize,e->vertex)) {
+                // 入队前标记
+                visited[visitedSize++] = e->vertex;
+                AdjListNode *nodeHead = find_head_by_vertex_ptr(g,e->vertex);
+                if (nodeHead) addQ(queue, nodeHead);             // 防止把 NULL 入队
+            }
+        }
+    }
+    destroyQueue(queue);
 }
