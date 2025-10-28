@@ -15,3 +15,4 @@ testAVL: $(TestAVL_OBJS)
 clean: 
 	rm -f $(BinTree_OBJS) BinTree
 	rm -f $(TestAVL_OBJS) TestAVL
+	rm -f stack stack2 test_queue testAVL hashMap BinTree_Array
