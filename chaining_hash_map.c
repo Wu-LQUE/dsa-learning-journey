@@ -35,7 +35,7 @@ double loadFactor(HashMapChaining *hashMap) {
     return (double)hashMap->size / (double)hashMap->capacity;
 }
 
-char *get(HashMapChaining *hashMap,int key) {
+hashMapElementType *get(HashMapChaining *hashMap,int key) {
     int index = hashFunc(hashMap, key);
     Node *cur = hashMap->buckets[index];
     while (cur) {
@@ -46,7 +46,7 @@ char *get(HashMapChaining *hashMap,int key) {
     }
 }
 
-void put(HashMapChaining *hashMap,int key,const char *val) {
+void put(HashMapChaining *hashMap,int key,const hashMapElementType *val) {
     if (loadFactor(hashMap) > hashMap->loadThres) {
         extend(hashMap);
     }

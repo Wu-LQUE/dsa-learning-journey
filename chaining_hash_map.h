@@ -3,11 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+typedef int hashMapElementType;
 //键值对 int->string
 typedef struct APair
 {
     int key;
-    char *val;
+    hashMapElementType *val;
 } Pair;
 /* 链表节点 */
 typedef struct ANode {
@@ -25,8 +26,8 @@ typedef struct AHashMapChaining {
 HashMapChaining *newHashMapChaining();
 void delHashMapChaining(HashMapChaining *hashMap);
 int hashFunc(HashMapChaining *hashMap, int key);
-char *get(HashMapChaining *hashMap,int key);
-void put(HashMapChaining *hashMap,int key,const char *val);
+hashMapElementType *get(HashMapChaining *hashMap,int key);
+void put(HashMapChaining *hashMap,int key,const hashMapElementType *val);
 void removeItem(HashMapChaining *hashMap, int key);
 void print(HashMapChaining *hashMap);
 #endif
