@@ -1,26 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-//键值对 int->string
-typedef struct APair
-{
-    int key;
-    char *val;
-} Pair;
-/* 链表节点 */
-typedef struct ANode {
-    Pair *pair;
-    Node *next;
-} Node;
-/* 链式地址哈希表 */
-typedef struct AHashMapChaining {
-    int size;         // 键值对数量
-    int capacity;     // 哈希表容量
-    double loadThres; // 触发扩容的负载因子阈值
-    int extendRatio;  // 扩容倍 数
-    Node **buckets;   // 桶数组
-} HashMapChaining;
-
+#include <chaining_hash_map.h>
 HashMapChaining *newHashMapChaining() {
     HashMapChaining *hashMap = (HashMapChaining*) malloc(sizeof(HashMapChaining));
     hashMap->size = 0;
