@@ -91,7 +91,7 @@ int binarySearchInsertion(int *nums, int numSize, int target) {
     //返回的是第一个>=target的元素位置
     return i;
 }
-
+//一个新的思考：二分法能在有序数组找到target，若有target，不妨取j=mid-1，在mid左边找找还有没有target，如果没有了，i依然可以增加到j+1的位置，返回第一个target
 
 int main(){
     struct AList ls = {{1,3,5,10,12,30},6};
