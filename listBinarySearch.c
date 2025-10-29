@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 #define MAXSIZE 20
 typedef struct AList * List;
 struct AList
@@ -66,6 +67,7 @@ int binarySearchInsertSimple(int *nums,int size,int target) {
 
 
 /* 二分查找插入点（可能存在或不存在重复元素） */
+//返回的是第一个>=target的元素位置
 int binarySearchInsertion(int *nums, int numSize, int target) {
     //对于有重复的元素的插入，可以考虑找到一个后，线性地往左边查找，但是效率可能时O(n)，不划算
     /*关于该算法：为什么不会“卡住”或“反复横跳”？
@@ -89,17 +91,47 @@ int binarySearchInsertion(int *nums, int numSize, int target) {
         }
     }
     //全部小于 target（如 [1,2,3], target=10）：i 会一路右推到 n，返回 n，插到末尾
-    //返回的是第一个>=target的元素位置
     return i;
 }//一个新的思考：二分法能在有序数组找到target，若有target，不妨取j=mid-1，在mid左边找找还有没有target，如果没有了，i依然可以增加到j+1的位置，返回第一个target
 
-//二分查找边界，如果一个target都没有，返回-1，否则返回最左边target的位置
+//二分查找左边界，如果一个target都没有，返回-1，否则返回最左边target的位置
 int binarySearchLeftEdge(int *nums, int numSize, int target) {
     if (!nums || numSize<=0) return -1;
     int idx = binarySearchInsertion(nums,numSize,target);
-    if (idx >=numSize || nums[idx] != target) return -1;
+    if (idx < 0 || idx >=numSize || nums[idx] != target) return -1;
     else return idx;
 }
+
+//二分查找右边界，如果一个target都没有，返回-1，否则返回最右边target的位置
+int binarySearchRightEdge(int *nums, int numSize, int target) {
+    if (!nums || numSize<=0) return -1;
+    int i = 0,j = numSize - 1;
+    while (i<=j)
+    {
+        int mid = i + (j - i)/2;
+        if (nums[mid] < target) {
+            i = mid + 1;
+        }else if (nums[mid] > target) {
+            j = mid - 1;
+        }else {
+            i = mid + 1;
+        }
+    }
+    
+    int idx = j;
+    if (idx <0 || nums[idx] != target) return -1;
+    else return idx;
+}
+
+int binarySearchRightEdge_2(int *nums,int numSize,int target) {
+    if (!nums || numSize <=0) return -1;
+    //利用最左查找，找target+1相当于找到了最右边的target，如果有
+    int idx = (target==INT_MAX) ? numSize : binarySearchInsertion(nums,numSize,target+1);
+    idx -= 1;
+    if (idx <0 ||idx >=numSize || nums[idx] != target) return -1;
+}
+
+
 
 int main(){
     struct AList ls = {{1,3,5,10,12,30},6};
