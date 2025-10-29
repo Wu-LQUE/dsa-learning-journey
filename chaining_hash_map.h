@@ -1,3 +1,5 @@
+#ifndef CHAINING_HASH_MAP_H
+#define CHAINING_HASH_MAP_H
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -27,3 +29,4 @@ char *get(HashMapChaining *hashMap,int key);
 void put(HashMapChaining *hashMap,int key,const char *val);
 void removeItem(HashMapChaining *hashMap, int key);
 void print(HashMapChaining *hashMap);
+#endif
