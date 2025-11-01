@@ -13,7 +13,7 @@ typedef struct APair
 /* 链表节点 */
 typedef struct ANode {
     Pair *pair;
-    Node *next;
+    struct ANode *next;
 } Node;
 /* 链式地址哈希表 */
 typedef struct AHashMapChaining {
@@ -31,4 +31,5 @@ void put(HashMapChaining *hashMap,int key,const hashMapElementType *val);
 void removeItem(HashMapChaining *hashMap, int key);
 void print(HashMapChaining *hashMap);
 int inKeySet(HashMapChaining *hashMap,int key);
+void extend(HashMapChaining *hashMap);
 #endif
