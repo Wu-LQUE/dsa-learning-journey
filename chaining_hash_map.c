@@ -1,4 +1,4 @@
-#include <chaining_hash_map.h>
+#include "chaining_hash_map.h"
 HashMapChaining *newHashMapChaining() {
     HashMapChaining *hashMap = (HashMapChaining*) malloc(sizeof(HashMapChaining));
     hashMap->size = 0;

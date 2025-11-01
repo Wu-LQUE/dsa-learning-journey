@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-typedef int hashMapElementType;
+typedef char hashMapElementType;
 //键值对 int->string
 typedef struct APair
 {
