@@ -15,3 +15,20 @@ void selectionSort(int nums[],int n) {
         nums[minIndex] = tmp;
     }
 }
+//冒泡排序:优化版(如果某轮没有做交换，则说明有序，提前终止)
+void bubbleSort(int nums[],int n) {
+    for (int i = 0; i < n; ++i) {
+        int swapped = 0;  // 优化：记录是否发生交换
+        for (int j = 0; j < n - i - 1; ++j) {
+            if (nums[j] > nums[j+1]) {
+                int tmp = nums[j];
+                nums[j] = nums[j+1];
+                nums[j+1] = tmp;
+                swapped = 1;
+            }
+        }
+        if (swapped==0) {
+            break;
+        }
+    }
+}
