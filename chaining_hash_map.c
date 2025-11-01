@@ -44,6 +44,19 @@ hashMapElementType *get(HashMapChaining *hashMap,int key) {
         }
         cur = cur->next;
     }
+    return NULL;
+}
+
+int inKeySet(HashMapChaining *hashMap,int key) {
+    int index = hashFunc(hashMap,key);
+    Node *cur = hashMap->buckets[index];
+    while (cur) {
+        if (cur->pair->key == key) {
+            return 1;
+        }
+        cur = cur->next;
+    }
+    return 0;
 }
 
 void put(HashMapChaining *hashMap,int key,const hashMapElementType *val) {

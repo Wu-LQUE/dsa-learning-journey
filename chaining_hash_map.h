@@ -30,4 +30,5 @@ hashMapElementType *get(HashMapChaining *hashMap,int key);
 void put(HashMapChaining *hashMap,int key,const hashMapElementType *val);
 void removeItem(HashMapChaining *hashMap, int key);
 void print(HashMapChaining *hashMap);
+int inKeySet(HashMapChaining *hashMap,int key);
 #endif
