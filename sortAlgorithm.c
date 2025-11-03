@@ -32,3 +32,56 @@ void bubbleSort(int nums[],int n) {
         }
     }
 }
+
+//插入排序
+void insertionSort(int nums[],int n) {
+    for (int i = 1; i < n; ++i) {
+        int base = nums[i];
+        int j = i - 1;
+        while (j >=0 && nums[j] > base) {
+            nums[j+1] = nums[j];
+            j--;
+        }
+        nums[j+1] = base;
+    }
+}
+
+void swap(int *i,int *j) {
+    if (i==j) return;
+    int tmp = *i;
+    *i = *j;
+    *j = tmp;
+}
+
+//快速排序
+int partition(int nums[],int left,int right) {
+    int i =left,j = right;
+    //只要i,j不相遇，就一直做交换，把小于基准的数放左边，大于基准的放右边
+    //相当于做一个双向的过滤，交换
+    //目的:左边<=基准<=右边
+
+    //两个while的顺序不能改变，首先保证第一轮交换不会把大数换到左边
+    //其次保证i<j条件被破坏时，无论是j碰到i还是i碰到j，这个数都是一个<=基准数的数
+    while (i < j) {
+        //找出第一个比基准数小的数
+        while (i < j && nums[j] >= nums[left]) {
+            j--;
+        }
+        //找出第一个比基准数大的数
+        while (i < j && nums[i] <= nums[left]) {
+            i++;
+        }
+        //交换
+        swap(&nums[i],&nums[j]);
+    }
+    swap(&nums[left],&nums[i]);
+    return i;
+}
+
+//初始调用left = 0, right = n - 1
+int quickSort(int nums[],int left,int right) {
+    if (left >= right) return;
+    int pivot = partition(nums,left,right);
+    partition(nums,left,pivot-1);
+    partition(nums,pivot+1,right);
+}
