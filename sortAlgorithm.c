@@ -79,9 +79,43 @@ int partition(int nums[],int left,int right) {
 }
 
 //初始调用left = 0, right = n - 1
-int quickSort(int nums[],int left,int right) {
+void quickSort(int nums[],int left,int right) {
     if (left >= right) return;
     int pivot = partition(nums,left,right);
-    partition(nums,left,pivot-1);
-    partition(nums,pivot+1,right);
+    quickSort(nums,left,pivot-1);
+    quickSort(nums,pivot+1,right);
+}
+
+//对哨兵选择的优化
+int medianThree(int nums[],int i,int j,int k) {
+    int a = nums[i],b=nums[j],c=nums[k];
+    if ((a <= b && b <=c) || (c <= b && b <=a)) return j;
+    else if ((b <= a && a <= c)||(c <= a && a <= b)) return i;
+    else return k;
+}
+
+int medianPartition(int nums[],int left,int right) {
+    int mid = (left + right)/2;
+    int base = medianThree(nums,left,mid,right);
+    swap(&nums[left],&nums[base]);
+    int i = left,j = right;
+    while (i < j) {
+        while (i < j && nums[j] >= nums[left]) {
+            j--;
+        }
+        while (i < j && nums[i] <= nums[left])
+        {
+            i++;
+        }
+        swap(&nums[i],&nums[j]);
+    }
+    swap(&nums[left],&nums[i]);
+    return i;
+}
+//优化的快速排序
+void refinedQuickSort(int nums[],int left,int right) {
+    if (left >= right) return;
+    int pivot = medianPartition(nums,left,right);
+    refinedQuickSort(nums,left,pivot-1);
+    refinedQuickSort(nums,pivot+1,right);
 }
