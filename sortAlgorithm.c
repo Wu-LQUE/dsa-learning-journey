@@ -112,10 +112,25 @@ int medianPartition(int nums[],int left,int right) {
     swap(&nums[left],&nums[i]);
     return i;
 }
+
 //优化的快速排序
 void refinedQuickSort(int nums[],int left,int right) {
     if (left >= right) return;
     int pivot = medianPartition(nums,left,right);
     refinedQuickSort(nums,left,pivot-1);
     refinedQuickSort(nums,pivot+1,right);
+}
+
+//空间优化
+void quickSortTailCall(int nums[],int left,int right) {
+    while (left < right) {
+        int privot = medianPartition(nums,left,right);
+        if (privot - left < right - privot) {
+            quickSortTailCall(nums,left,privot-1);
+            left = privot + 1;
+        }else {
+            quickSOrtTailCall(nums,privot + 1,right);
+            right = privot - 1;
+        }
+    }
 }
