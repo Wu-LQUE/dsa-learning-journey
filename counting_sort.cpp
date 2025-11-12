@@ -50,7 +50,7 @@ void countingSort(vector<int> &nums) {
     for (int i = n-1; i >= 0; --i) {
         int num = nums[i];
         res[counter[num] - 1] = num;
-        counter[num]--;
+        counter[num]--;// 令前缀和自减 1 ，得到下次放置 num 的索引
     }
     nums = res;
 }
