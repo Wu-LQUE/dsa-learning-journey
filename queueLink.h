@@ -1,12 +1,12 @@
 #ifndef QUEUELINK_H
 #define QUEUELINK_H
 
-#include "BinTree.h"
+#include "graph_adjacency_list.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 
-typedef BinTree ElementType;
+typedef AdjListNode* ElementType;
 typedef struct QNode * Queue;
 typedef struct ANode * Node;
 
