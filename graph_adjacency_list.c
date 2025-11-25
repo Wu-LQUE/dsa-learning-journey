@@ -1,5 +1,7 @@
 #include "graph_adjacency_list.h"
-/* 内部辅助函数（静态） */
+#include "queueLink.h"
+/* 内部辅助函数（静态）
+    通过vertex指针寻找到它的真正所有者(头节点)*/
 static AdjListNode *find_head_by_vertex_ptr(const GraphAdjList *g, const GraphVertex *v) {
     if (!g || !v) return NULL;
     for (int i = 0; i < g->vertex_count; ++i) {
@@ -35,7 +37,7 @@ static int remove_edge_oneway(AdjListNode *head,const GraphVertex *to) {
     AdjListNode *pre = head,*cur = head->next;
     while (cur)
     {
-        if (cur->vertex = to) {
+        if (cur->vertex == to) {
             pre->next = cur->next;
             free(cur);//vertex是头节点所有，不能在边节点里free;
             return 1;//成功删除一次
@@ -163,4 +165,101 @@ GraphVertex *graph_vertex_create(int id) {
     if (!v) return NULL;
     v->id = id;
     return v;
+}
+
+int isVisited(GraphVertex **visited,int size,GraphVertex *vet) {
+    for (int i = 0; i < size; ++i) {
+        if (visited[i] == vet) return 1;
+    }
+    return 0;
+}
+
+// void graphBFS(GraphAdjList *g) {
+//     if (!g || g->vertex_count <= 0) return;
+    
+//     Queue queue = createQueue();
+//     if (!queue) return;
+
+//     //获取所有头节点数
+//     int vertex_count = g->vertex_count;
+//     int visited_size = 0;
+//     int res_size = 0;
+//     GraphVertex *visited[vertex_count];
+//     GraphVertex *res[vertex_count];
+    
+//     //将头节点入队
+//     AdjListNode *node = g->heads[0];
+//     visited[visited_size++] = node->vertex;
+//     addQ(queue,node);
+
+//     while (!isEmptyQueue(queue))
+//     {
+//         node = deleteQ(queue);
+//         if (!node) break;
+//         res[res_size++] = node->vertex;
+//         node = node->next;
+//         while (node) {
+//             if (!isVisited(visited,visited_size,node->vertex)) {
+//                 AdjListNode *e = find_head_by_vertex_ptr(g,node->vertex);
+//                 if (e) {
+//                     visited[visited_size++] = e->vertex;
+//                     addQ(queue,e);
+//                 }
+//             }
+//             node = node->next;
+//         }
+//     }
+//     destroyQueue(queue);
+// }
+
+void graphBFS(GraphAdjList *g) {
+    if (!g || g->vertex_count <= 0) return;
+    Queue queue = createQueue();
+    if (!queue) return;
+    // int vertex_count = g->vertex_count;
+    int visitedSize=0,resultSize=0;
+    // 若需更好的可移植性，改用 MAX_GRAPH_SIZE
+    GraphVertex *visited[MAX_GRAPH_SIZE];
+    GraphVertex *result[MAX_GRAPH_SIZE];
+    // 起点：入队即标记
+    AdjListNode *head = g->heads[0];
+    visited[visitedSize++] = head->vertex;
+    addQ(queue,head);
+    while (!isEmptyQueue(queue)) {
+        head = deleteQ(queue);
+        if (!head) break;
+        result[resultSize++] = head->vertex;
+        for (AdjListNode *e = head->next;e;e=e->next) {
+            if (!isVisited(visited,visitedSize,e->vertex)) {
+                // 入队前标记
+                visited[visitedSize++] = e->vertex;
+                AdjListNode *nodeHead = find_head_by_vertex_ptr(g,e->vertex);
+                if (nodeHead) addQ(queue, nodeHead);             // 防止把 NULL 入队
+            }
+        }
+    }
+    destroyQueue(queue);
+}
+
+void dfs(GraphAdjList *graph,GraphVertex *vertex,GraphVertex **result,int *resultSize) {
+    if (!graph || !vertex || !result || !resultSize) return;
+    // 若已访问则直接返回，避免重复与潜在环，同时能防止调用方重复调用节点导致的数组越界问题
+    if (isVisited(result, *resultSize, vertex)) return;
+    result[(*resultSize)++] = vertex;
+    AdjListNode *node = find_head_by_vertex_ptr(graph,vertex);
+    if (!node) return;
+    //深度优先搜索也是要遍历所有邻接节点的
+    for (AdjListNode *e = node->next;e;e=e->next) {
+        //用 result 既做访问序列又做 visited 集合是可行的
+        if (!isVisited(result,*resultSize,e->vertex)) {
+            dfs(graph,e->vertex,result,resultSize);
+        }
+    }
+}
+
+void graphDFS(GraphAdjList *graph,GraphVertex *startVertex,GraphVertex **result,int *resultSize) {
+    if (!graph || !startVertex || !result || !resultSize) return;
+    // 如需从空结果开始，可取消注释
+    // *resultSize = 0;
+    dfs(graph,startVertex,result,resultSize);
 }

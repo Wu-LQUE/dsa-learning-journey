@@ -30,7 +30,7 @@ ElementType addQ(Queue queue,ElementType val){
         //排到队尾
         queue->rear = newNode;
     }
-    return 0;
+    return NULL;
 }
 ElementType deleteQ(Queue queue){
     ElementType data;
