@@ -1,3 +1,5 @@
+#ifndef GRAPH_ADJACENCY_LIST
+#define GRAPH_ADJACENCY_LIST
 #include <stdio.h>
 #include <stdlib.h>
 #define MAX_GRAPH_SIZE 10
@@ -18,3 +20,4 @@ typedef struct AdjListNode
     GraphVertex *vertex;//边节点不拥有vertex,仅引用
     AdjListNode *next;
 } AdjListNode;
+#endif
